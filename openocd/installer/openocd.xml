@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jonchki-artifact version="1.0">
+	<info group="org.openocd"
+	      module="openocd"
+	      artifact="openocd"
+	      version="@PROJECT_VERSION@"
+	      vcs-id="@PROJECT_VERSION_VCS@"
+	      extension="tar.xz"
+	      platform="@JONCHKI_PLATFORM@">
+		<license name="GPL-V2"/>
+		<author name="OpenOCD team" url="http://openocd.org" />
+		<description>
+OpenOCD provides on-chip programming and debugging support with a
+layered architecture of JTAG interface and TAP support including:
+
+- (X)SVF playback to facilitate automated boundary scan and FPGA/CPLD
+  programming;
+- debug target support (e.g. ARM, MIPS): single-stepping,
+  breakpoints/watchpoints, gprof profiling, etc;
+- flash chip drivers (e.g. CFI, NAND, internal flash);
+- embedded TCL interpreter for easy scripting.
+
+This version comes with a simple front-end for the LUA language.
+		</description>
+	</info>
+	<dependencies>
+	</dependencies>
+</jonchki-artifact>
