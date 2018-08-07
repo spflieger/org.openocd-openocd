@@ -121,7 +121,6 @@ CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/cmake/config.h.in ${CMAKE_CURRENT_BIN
 #-----------------------------------------------------------------------------
 #
 # Hexdump
-# TODO: hier eine Funktion draus machen.
 #
 
 FUNCTION(OPENOCD_BIN2CHAR HEXDUMP_INPUT_FILE HEXDUMP_OUTPUT_FILE)
@@ -511,25 +510,7 @@ SET_TARGET_PROPERTIES(LIBRARY_libopenocd PROPERTIES
 
 #-----------------------------------------------------------------------------
 #
-# Install all components of the library.
-# This is the library itself and the public headers.
-#
-
-SET(CMAKE_INSTALL_PREFIX /install)
-INSTALL(TARGETS LIBRARY_libopenocd
-        EXPORT EXPORT_package
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib
-        RUNTIME DESTINATION bin
-        INCLUDES DESTINATION include)
-
-INSTALL(FILES src/muhkuh_openocd.h
-        DESTINATION include)
-
-
-#-----------------------------------------------------------------------------
-#
-# This is just a test for the library.
+# Build the CLI front end for the library.
 #
 
 SET(SOURCES_openocd
@@ -546,6 +527,29 @@ TARGET_INCLUDE_DIRECTORIES(TARGET_openocd
                                    ${LIBJIM_INCLUDE_DIRECTORIES})
 TARGET_COMPILE_DEFINITIONS(TARGET_openocd
                            PRIVATE ${LIBRARY_libopenocd_defines})
+
+# Set the name of the output file to "openocd".
+SET_TARGET_PROPERTIES(TARGET_openocd PROPERTIES
+                      PREFIX ""
+                      OUTPUT_NAME "openocd")
+
+
+#-----------------------------------------------------------------------------
+#
+# Install all components of the library and CLI front end.
+# This is the library itself and the public headers.
+#
+
+SET(CMAKE_INSTALL_PREFIX /install)
+INSTALL(TARGETS LIBRARY_libopenocd TARGET_openocd
+        EXPORT EXPORT_package
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib
+        RUNTIME DESTINATION bin
+        INCLUDES DESTINATION include)
+
+INSTALL(FILES src/muhkuh_openocd.h
+        DESTINATION include)
 
 
 #----------------------------------------------------------------------------

@@ -38,7 +38,6 @@ ExternalProject_Add(TARGET_openocd
                     CMAKE_ARGS ${OPENOCD_CMAKE_ARGS}
                     INSTALL_COMMAND ${CMAKE_MAKE_PROGRAM} install DESTDIR=${CMAKE_CURRENT_BINARY_DIR}
 )
-#ADD_DEPENDENCIES(TARGET_openocd TARGET_libusb)
 
 
 #----------------------------------------------------------------------------
@@ -59,6 +58,9 @@ IF(${JONCHKI_PLATFORM_DIST_ID} STREQUAL "windows")
 	               ${CMAKE_CURRENT_BINARY_DIR}/package/install.lua
 	               @ONLY)
 
+	INSTALL(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/install/bin/openocd.exe
+	        DESTINATION bin)
+
 	INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/package/install.lua
 	        DESTINATION .)
 ELSE(${JONCHKI_PLATFORM_DIST_ID} STREQUAL "windows")
@@ -67,6 +69,9 @@ ELSE(${JONCHKI_PLATFORM_DIST_ID} STREQUAL "windows")
 	CONFIGURE_FILE(installer/install_linux.lua
 	               ${CMAKE_CURRENT_BINARY_DIR}/package/install.lua
 	               @ONLY)
+
+	INSTALL(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/install/bin/openocd
+	        DESTINATION bin)
 
 	INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/package/install.lua
 	        DESTINATION .)
