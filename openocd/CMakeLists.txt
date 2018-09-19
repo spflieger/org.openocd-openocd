@@ -60,6 +60,8 @@ IF(${JONCHKI_PLATFORM_DIST_ID} STREQUAL "windows")
 
 	INSTALL(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/install/bin/openocd.exe
 	        DESTINATION bin)
+	INSTALL(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/install/bin/openocd.dll
+	        DESTINATION bin)
 
 	INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/package/install.lua
 	        DESTINATION .)

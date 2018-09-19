@@ -6,7 +6,7 @@ if strDistId=='@JONCHKI_PLATFORM_DIST_ID@' and strCpuArch=='@JONCHKI_PLATFORM_CP
   t:install_dev('include',     '${install_dev_include}/')
   t:install_dev('lib',         '${install_dev_lib}/')
   t:install_dev('cmake',       '${install_dev_cmake}/')
-  t:install('lib/openocd.dll',  '${install_lua_cpath}/openocd/')
+  t:install('bin/openocd.dll',  '${install_lua_cpath}/openocd/')
   tResult = true
 end
 
