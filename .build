@@ -45,6 +45,26 @@ elif [ "$TARGET" == "windows64" ]; then
 	CMAKE_PLATFORM="-DJONCHKI_PLATFORM_DIST_ID=windows -DJONCHKI_PLATFORM_DIST_VERSION="" -DJONCHKI_PLATFORM_CPU_ARCH=x86_64"
 	TOOLS_PATH=/usr/mingw-w64-x86_64/bin:${PATH}
 
+elif [ "$TARGET" == "raspberry" ]; then
+	rm -rf build/raspberry
+	mkdir -p build/raspberry
+
+	# Download all build dependencies to a special folder.
+	PKGBASE=${PRJ_DIR}/build/raspberry/packages
+	mkdir -p ${PKGBASE}
+	pushd ${PKGBASE}
+	echo $PKGBASE
+	${PRJ_DIR}/cmake/tools/get_dependencies.sh libudev-dev:arm64
+	popd
+
+	CMAKE_C_FLAGS="-I${PKGBASE}/usr/include/ -L${PKGBASE}/lib/aarch64-linux-gnu/ -Xlinker -rpath=${PKGBASE}/lib/aarch64-linux-gnu/"
+	CMAKE_CXX_FLAGS="-I${PKGBASE}/usr/include/ -L${PKGBASE}/lib/aarch64-linux-gnu/ -Xlinker -rpath=${PKGBASE}/lib/aarch64-linux-gnu/"
+	echo $CMAKE_C_FLAGS
+	echo $CMAKE_CXX_FLAGS
+	CMAKE_COMPILER="-DCMAKE_C_COMPILER=aarch64-linux-gnu-gcc -DCMAKE_CXX_COMPILER=aarch64-linux-gnu-g++"
+	CMAKE_PLATFORM="-DJONCHKI_PLATFORM_DIST_ID=ubuntu -DJONCHKI_PLATFORM_DIST_VERSION=18.04 -DJONCHKI_PLATFORM_CPU_ARCH=arm64"
+	TOOLS_PATH=${PATH}
+
 else
 	echo "Unknown build target: ${TARGET}"
 	exit -1
@@ -56,6 +76,6 @@ mkdir -p ${BUILD_DIR}
 
 # Build openocd.
 pushd ${BUILD_DIR}
-PATH=${TOOLS_PATH} cmake -DCMAKE_INSTALL_PREFIX="" ${CMAKE_COMPILER} ${CMAKE_PLATFORM} ${CMAKE_MODULES} ${PRJ_DIR}
+PATH=${TOOLS_PATH} cmake -DCMAKE_INSTALL_PREFIX="" -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS}" -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS}" ${CMAKE_COMPILER} ${CMAKE_PLATFORM} ${CMAKE_MODULES} ${PRJ_DIR}
 PATH=${TOOLS_PATH} make pack
 popd
