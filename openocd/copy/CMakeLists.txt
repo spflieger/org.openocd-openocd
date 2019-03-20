@@ -41,9 +41,10 @@ CHECK_INCLUDE_FILES(ifaddrs.h HAVE_IFADDRS_H)
 CHECK_INCLUDE_FILES(inttypes.h HAVE_INTTYPES_H)
 CHECK_INCLUDE_FILES(jtag_minidriver.h HAVE_JTAG_MINIDRIVER_H)
 
-# We definitely have libusb-1.x with libusb_error_name() .
+# We definitely have libusb-1.x with libusb_error_name() and get_port_numbers() .
 SET(HAVE_LIBUSB1 1)
 SET(HAVE_LIBUSB_ERROR_NAME 1)
+SET(HAVE_LIBUSB_GET_PORT_NUMBERS 1)
 
 CHECK_TYPE_SIZE("long long int" HAVE_LONG_LONG_INT)
 CHECK_TYPE_SIZE("unsigned long long int" HAVE_UNSIGNED_LONG_LONG_INT)

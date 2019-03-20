@@ -166,6 +166,9 @@
 /* Define if your libusb has libusb_error_name() */
 #cmakedefine HAVE_LIBUSB_ERROR_NAME 1
 
+/* Define if your libusb has libusb_get_port_numbers() */
+#cmakedefine HAVE_LIBUSB_GET_PORT_NUMBERS 1
+
 /* Define to 1 if the system has the type `long long int'. */
 #cmakedefine HAVE_LONG_LONG_INT 1
 
