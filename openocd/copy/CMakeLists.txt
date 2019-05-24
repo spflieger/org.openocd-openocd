@@ -403,6 +403,8 @@ SET(SOURCES_libtarget
 	src/target/etm_dummy.c
 	src/target/fa526.c
 	src/target/feroceon.c
+	src/target/hiahbl.c
+	src/target/hinetiol.c
 	src/target/hla_target.c
 	src/target/image.c
 	src/target/lakemont.c
