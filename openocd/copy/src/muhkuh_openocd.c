@@ -519,6 +519,7 @@ int muhkuh_openocd_call(void *pvContext, uint32_t ulNetxAddress, uint32_t ulR0, 
 	char strCmd[32];
 	int fIsRunning;
 	enum target_state tState;
+	char *pcTargetTypeName;
 
 	DCC_LINE_BUFFER_T tDccLineBuffer = {NULL, 0};
 
@@ -528,76 +529,108 @@ int muhkuh_openocd_call(void *pvContext, uint32_t ulNetxAddress, uint32_t ulR0, 
 	/* Get the target from the command context. */
 	ptTarget = get_current_target(ptCmdCtx);
 
+	/* Get the target type name */
+	pcTargetTypeName = target_type_name(ptTarget);
+	fprintf(stderr, "target type: %s\n", pcTargetTypeName);
+
 	/* Expect failure. */
 	iResult = -1;
 
-	/* Set the register R0. */
+	/* Pass the pointer to parameters in register r0 on ARM, a0 on netIOL. */
 	memset(strCmd, 0, sizeof(strCmd));
-	snprintf(strCmd, sizeof(strCmd)-1, "reg r0 0x%08X", ulR0);
-	iOocdResult = command_run_line(ptCmdCtx, strCmd);
-	if( iOocdResult!=ERROR_OK )
+	
+	if (0==strcmp(pcTargetTypeName, "hinetiol"))
 	{
-		fprintf(stderr, "muhkuh_openocd_call: set r0 failed!\n");
+		snprintf(strCmd, sizeof(strCmd)-1, "reg a0 0x%08X", ulR0);
 	}
 	else
 	{
-		memset(strCmd, 0, sizeof(strCmd));
-		snprintf(strCmd, sizeof(strCmd)-1, "resume 0x%08X", ulNetxAddress);
+		snprintf(strCmd, sizeof(strCmd)-1, "reg r0 0x%08X", ulR0);
+	}
+	
+	fprintf(stderr, "cmd: %s\n", strCmd);
+	iOocdResult = command_run_line(ptCmdCtx, strCmd);
+	fprintf(stderr, "result: %d\n", iOocdResult);
+	if( iOocdResult!=ERROR_OK )
+	{
+		fprintf(stderr, "muhkuh_openocd_call: set r0/a0 failed!\n");
+	}
+	else
+	{
+
+		/* Set the PC and then resume. 
+		   Resume <address> does not work on target hinetiol. */
+		snprintf(strCmd, sizeof(strCmd)-1, "reg pc 0x%08X", ulNetxAddress);
+		fprintf(stderr, "cmd: %s\n", strCmd);
 		iOocdResult = command_run_line(ptCmdCtx, strCmd);
+		fprintf(stderr, "result: %d\n", iOocdResult);
 		if( iOocdResult!=ERROR_OK )
 		{
-			fprintf(stderr, "muhkuh_openocd_call: resume failed!\n");
+			fprintf(stderr, "muhkuh_openocd_call: set pc failed!\n");
 		}
 		else
 		{
-			// redirect output handler, then grab messages, restore default output handler on halt
-			command_set_output_handler(ptCmdCtx, &romloader_jtag_command_output_handler, &tDccLineBuffer);
-
-			/* Wait for halt. */
-			do
+			memset(strCmd, 0, sizeof(strCmd));
+			snprintf(strCmd, sizeof(strCmd)-1, "resume");
+			fprintf(stderr, "cmd: %s\n", strCmd);
+			iOocdResult = command_run_line(ptCmdCtx, strCmd);
+			fprintf(stderr, "result: %d\n", iOocdResult);
+			if( iOocdResult!=ERROR_OK )
 			{
-				usleep(1000*100);
-				ptTarget->type->poll(ptTarget);
-				tState = ptTarget->state;
-				if( tState==TARGET_HALTED )
-				{
-					fprintf(stderr, "call finished!\n");
-					iResult = 0;
-				}
-				else
-				{
-					/* Execute the Lua callback. */
-					fIsRunning = pfnCallback(pvCallbackUserData, tDccLineBuffer.pucDccData, tDccLineBuffer.ulDccDataSize);
-					dcc_line_buffer_clear(&tDccLineBuffer, 1);
+				fprintf(stderr, "muhkuh_openocd_call: resume failed!\n");
+			}
+			else
+			{
+				// redirect output handler, then grab messages, restore default output handler on halt
+				command_set_output_handler(ptCmdCtx, &romloader_jtag_command_output_handler, &tDccLineBuffer);
 
-					if( fIsRunning==0 )
+				/* Wait for halt. */
+				do
+				{
+					usleep(1000*100);
+					ptTarget->type->poll(ptTarget);
+					tState = ptTarget->state;
+					//fprintf(stderr, "target state: %d\n", (unsigned long) tState);
+					if( tState==TARGET_HALTED )
 					{
-						/* The operation was canceled, halt the target. */
-						fprintf(stderr, "Call canceled by the user, stopping target...\n");
-						iOocdResult = ptTarget->type->halt(ptTarget);
-						if( iOocdResult!=ERROR_OK )
-						{
-							fprintf(stderr, "Failed to halt target: %d\n", iOocdResult);
-						}
-						break;
+						fprintf(stderr, "call finished!\n");
+						iResult = 0;
 					}
 					else
 					{
-						/* call OpenOCD timer callbacks */
-						target_call_timer_callbacks();
+						/* Execute the Lua callback. */
+						fIsRunning = pfnCallback(pvCallbackUserData, tDccLineBuffer.pucDccData, tDccLineBuffer.ulDccDataSize);
+						dcc_line_buffer_clear(&tDccLineBuffer, 1);
+
+						if( fIsRunning==0 )
+						{
+							/* The operation was canceled, halt the target. */
+							fprintf(stderr, "Call canceled by the user, stopping target...\n");
+							iOocdResult = ptTarget->type->halt(ptTarget);
+							if( iOocdResult!=ERROR_OK )
+							{
+								fprintf(stderr, "Failed to halt target: %d\n", iOocdResult);
+							}
+							break;
+						}
+						else
+						{
+							/* call OpenOCD timer callbacks */
+							target_call_timer_callbacks();
+						}
 					}
-				}
-			} while( tState!=TARGET_HALTED );
+				} while( tState!=TARGET_HALTED );
 
-			/* call timer callbacks once more (to get remaining DCC output), then call the callback to consume this output */
-			target_call_timer_callbacks();
-			pfnCallback(pvCallbackUserData, tDccLineBuffer.pucDccData, tDccLineBuffer.ulDccDataSize);
-			dcc_line_buffer_clear(&tDccLineBuffer, 1);
+				/* call timer callbacks once more (to get remaining DCC output), then call the callback to consume this output */
+				target_call_timer_callbacks();
+				pfnCallback(pvCallbackUserData, tDccLineBuffer.pucDccData, tDccLineBuffer.ulDccDataSize);
+				dcc_line_buffer_clear(&tDccLineBuffer, 1);
 
-			command_clear_output_handler(ptCmdCtx);
+				command_clear_output_handler(ptCmdCtx);
 
-			/* FIXME: is this really necessary? */
-			usleep(1000);
+				/* FIXME: is this really necessary? */
+				usleep(1000);
+			}
 		}
 	}
 
