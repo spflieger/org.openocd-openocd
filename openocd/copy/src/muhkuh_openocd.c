@@ -212,9 +212,6 @@ int muhkuh_openocd_read_data08(void *pvContext, uint32_t ulNetxAddress, uint8_t 
 		iResult = 1;
 	}
 
-	/* FIXME: is this really necessary? */
-	usleep(1000);
-
 	return iResult;
 }
 
@@ -243,9 +240,6 @@ int muhkuh_openocd_read_data16(void *pvContext, uint32_t ulNetxAddress, uint16_t
 	{
 		iResult = 1;
 	}
-
-	/* FIXME: is this really necessary? */
-	usleep(1000);
 
 	return iResult;
 }
@@ -276,9 +270,6 @@ int muhkuh_openocd_read_data32(void *pvContext, uint32_t ulNetxAddress, uint32_t
 		iResult = 1;
 	}
 
-	/* FIXME: is this really necessary? */
-	usleep(1000);
-
 	return iResult;
 }
 
@@ -307,9 +298,6 @@ int muhkuh_openocd_read_image(void *pvContext, uint32_t ulNetxAddress, uint8_t *
 	{
 		iResult = 1;
 	}
-
-	/* FIXME: is this really necessary? */
-	usleep(1000);
 
 	return iResult;
 }
@@ -340,9 +328,6 @@ int muhkuh_openocd_write_data08(void *pvContext, uint32_t ulNetxAddress, uint8_t
 		iResult = 1;
 	}
 
-	/* FIXME: is this really necessary? */
-	usleep(1000);
-
 	return iResult;
 }
 
@@ -371,9 +356,6 @@ int muhkuh_openocd_write_data16(void *pvContext, uint32_t ulNetxAddress, uint16_
 	{
 		iResult = 1;
 	}
-
-	/* FIXME: is this really necessary? */
-	usleep(1000);
 
 	return iResult;
 }
@@ -404,9 +386,6 @@ int muhkuh_openocd_write_data32(void *pvContext, uint32_t ulNetxAddress, uint32_
 		iResult = 1;
 	}
 
-	/* FIXME: is this really necessary? */
-	usleep(1000);
-
 	return iResult;
 }
 
@@ -435,9 +414,6 @@ int muhkuh_openocd_write_image(void *pvContext, uint32_t ulNetxAddress, const ui
 	{
 		iResult = 1;
 	}
-
-	/* FIXME: is this really necessary? */
-	usleep(1000);
 
 	return iResult;
 }
@@ -587,7 +563,7 @@ int muhkuh_openocd_call(void *pvContext, uint32_t ulNetxAddress, uint32_t ulR0, 
 				/* Wait for halt. */
 				do
 				{
-					usleep(1000*100);
+					usleep(1000);
 					ptTarget->type->poll(ptTarget);
 					tState = ptTarget->state;
 					//fprintf(stderr, "target state: %d\n", (unsigned long) tState);
@@ -627,9 +603,6 @@ int muhkuh_openocd_call(void *pvContext, uint32_t ulNetxAddress, uint32_t ulR0, 
 				dcc_line_buffer_clear(&tDccLineBuffer, 1);
 
 				command_clear_output_handler(ptCmdCtx);
-
-				/* FIXME: is this really necessary? */
-				usleep(1000);
 			}
 		}
 	}
