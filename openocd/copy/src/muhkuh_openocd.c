@@ -472,7 +472,7 @@ void dcc_line_buffer_put(DCC_LINE_BUFFER_T* ptBuffer, const char *line)
 		}
 		else
 		{
-			printf("!Error: failed to allocate buffer for DCC debug message\n");
+			fprintf(stderr, "!Error: failed to allocate buffer for DCC debug message\n");
 		}
 
 	}
